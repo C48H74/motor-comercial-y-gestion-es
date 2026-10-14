@@ -1,9 +1,9 @@
-// Valida a estrutura da skill. Uso:
-//   node validar_skill.mjs [caminho-da-skill]
-// Sem argumento: usa a pasta onde este script está (se houver ./SKILL.md) ou ./skill.
-// Regras: SKILL.md com frontmatter YAML; name casa ^[a-z0-9]+(?:-[a-z0-9]+)*$; description não vazia;
-// referencias/templates citados existem; cada arquivo de references/templates tem frontmatter.
-// Parser simples de frontmatter (chave: valor). Para validação com o parser YAML real, use validar_yaml.mjs.
+// Valida la estructura de la skill. Uso:
+//   node validar_skill.mjs [ruta-de-la-skill]
+// Sin argumento: usa la carpeta donde está este script (si contiene ./SKILL.md) o ./skill.
+// Reglas: SKILL.md tiene frontmatter YAML; name cumple ^[a-z0-9]+(?:-[a-z0-9]+)*$; description no está vacía;
+// las references/templates citadas existen; cada archivo de references/templates tiene frontmatter.
+// Parser simple del frontmatter (clave: valor). Para validar con el parser YAML real, usa validar_yaml.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,89 +13,89 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const candidatos = [process.argv[2], scriptDir, path.join(scriptDir, 'skill'), path.resolve('skill'), path.resolve('.')].filter(Boolean);
 const root = path.resolve(candidatos.find((c) => fs.existsSync(path.join(path.resolve(c), 'SKILL.md'))) ?? candidatos[0]);
 
-let erros = 0;
+let errores = 0;
 let avisos = 0;
 const ok = (m) => console.log('  OK    ' + m);
-const erro = (m) => { erros++; console.log('  ERRO  ' + m); };
+const error = (m) => { errores++; console.log('  ERROR ' + m); };
 const aviso = (m) => { avisos++; console.log('  AVISO ' + m); };
 
 function frontmatter(texto) {
   const m = texto.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!m) return null;
-  const dados = {};
-  let chaveAtual = null;
-  for (const linha of m[1].split(/\r?\n/)) {
-    const kv = linha.match(/^([A-Za-z][A-Za-z0-9_-]*):\s?(.*)$/);
-    if (kv) { chaveAtual = kv[1]; dados[chaveAtual] = kv[2].trim(); }
-    else if (chaveAtual && linha.trim()) dados[chaveAtual] += ' ' + linha.trim();
+  const datos = {};
+  let claveActual = null;
+  for (const linea of m[1].split(/\r?\n/)) {
+    const kv = linea.match(/^([A-Za-z][A-Za-z0-9_-]*):\s?(.*)$/);
+    if (kv) { claveActual = kv[1]; datos[claveActual] = kv[2].trim(); }
+    else if (claveActual && linea.trim()) datos[claveActual] += ' ' + linea.trim();
   }
-  return { dados, corpo: texto.slice(m[0].length) };
+  return { datos, cuerpo: texto.slice(m[0].length) };
 }
 
-console.log('=== 1. Estrutura ===');
-console.log('  raiz: ' + root);
-if (!fs.existsSync(path.join(root, 'SKILL.md'))) { erro('SKILL.md não encontrado em ' + root); process.exit(1); }
+console.log('=== 1. Estructura ===');
+console.log('  raíz: ' + root);
+if (!fs.existsSync(path.join(root, 'SKILL.md'))) { error('SKILL.md no encontrado en ' + root); process.exit(1); }
 ok('SKILL.md presente');
 for (const sub of ['references', 'templates']) {
   if (fs.existsSync(path.join(root, sub))) ok(sub + '/ presente');
-  else erro(sub + '/ ausente');
+  else error(sub + '/ ausente');
 }
 
-console.log('\n=== 2. Frontmatter do SKILL.md ===');
+console.log('\n=== 2. Frontmatter de SKILL.md ===');
 const textoSkill = fs.readFileSync(path.join(root, 'SKILL.md'), 'utf8');
 const fm = frontmatter(textoSkill);
-if (!fm) erro('SKILL.md sem frontmatter YAML: o loader ignora a skill');
+if (!fm) error('SKILL.md sin frontmatter YAML: el cargador ignora la skill');
 else {
-  const { dados, corpo } = fm;
-  if (!dados.name) erro('campo "name" ausente');
-  else if (!SKILL_NAME.test(dados.name)) erro(`name "${dados.name}" não casa ${SKILL_NAME}`);
-  else ok(`name válido: "${dados.name}"`);
-  if (dados.name && path.basename(root) !== 'skill' && dados.name !== path.basename(root))
-    aviso(`name ("${dados.name}") difere do nome da pasta ("${path.basename(root)}")`);
-  if (!dados.description) erro('campo "description" ausente ou vazio');
-  else if (dados.description.length < 40) aviso(`description curta (${dados.description.length} chars): pode não rotear bem`);
-  else ok(`description: ${dados.description.length} chars`);
-  if (dados.whenToUse) ok(`whenToUse presente: ${dados.whenToUse.length} chars`);
+  const { datos, cuerpo } = fm;
+  if (!datos.name) error('campo "name" ausente');
+  else if (!SKILL_NAME.test(datos.name)) error(`name "${datos.name}" no cumple ${SKILL_NAME}`);
+  else ok(`name válido: "${datos.name}"`);
+  if (datos.name && path.basename(root) !== 'skill' && datos.name !== path.basename(root))
+    aviso(`name ("${datos.name}") difiere del nombre de la carpeta ("${path.basename(root)}")`);
+  if (!datos.description) error('campo "description" ausente o vacío');
+  else if (datos.description.length < 40) aviso(`description corta (${datos.description.length} caracteres): puede no enrutar bien`);
+  else ok(`description: ${datos.description.length} caracteres`);
+  if (datos.whenToUse) ok(`whenToUse presente: ${datos.whenToUse.length} caracteres`);
   else aviso('whenToUse ausente (opcional)');
-  console.log(`  corpo: ${corpo.trim().split(/\r?\n/).length} linhas, ${corpo.length} chars`);
-  if (/^## (Limites conhecidos|Límites conocidos|Known limits)/m.test(corpo)) ok('seção "Limites conhecidos" presente');
-  else aviso('seção "Limites conhecidos" ausente: a skill deveria declarar o que não foi verificado');
+  console.log(`  cuerpo: ${cuerpo.trim().split(/\r?\n/).length} líneas, ${cuerpo.length} caracteres`);
+  if (/^## (Limites conhecidos|Límites conocidos|Known limits)/m.test(cuerpo)) ok('sección "Límites conocidos" presente');
+  else aviso('sección "Límites conocidos" ausente: la skill debería declarar lo que no se verificó');
 }
 
-console.log('\n=== 3. Arquivos de references e templates ===');
+console.log('\n=== 3. Archivos de references y templates ===');
 const listar = (sub) => fs.existsSync(path.join(root, sub))
   ? fs.readdirSync(path.join(root, sub)).filter((f) => f.endsWith('.md')).sort() : [];
-const arquivos = [...listar('references').map((f) => 'references/' + f), ...listar('templates').map((f) => 'templates/' + f)];
-for (const rel of arquivos) {
+const archivos = [...listar('references').map((f) => 'references/' + f), ...listar('templates').map((f) => 'templates/' + f)];
+for (const rel of archivos) {
   const f2 = frontmatter(fs.readFileSync(path.join(root, rel), 'utf8'));
-  if (!f2) erro(`${rel}: sem frontmatter`);
-  else if (!f2.dados.title) erro(`${rel}: frontmatter sem "title"`);
+  if (!f2) error(`${rel}: sin frontmatter`);
+  else if (!f2.datos.title) error(`${rel}: frontmatter sin "title"`);
   else ok(`${rel}`);
 }
 
-console.log('\n=== 4. Referências cruzadas (SKILL.md e demais arquivos) ===');
-const alvos = new Set();
-const origens = [['SKILL.md', textoSkill], ...arquivos.map((rel) => [rel, fs.readFileSync(path.join(root, rel), 'utf8')])];
-for (const [origem, texto] of origens) {
+console.log('\n=== 4. Referencias cruzadas (SKILL.md y demás archivos) ===');
+const destinos = new Set();
+const origenes = [['SKILL.md', textoSkill], ...archivos.map((rel) => [rel, fs.readFileSync(path.join(root, rel), 'utf8')])];
+for (const [origen, texto] of origenes) {
   for (const m of texto.matchAll(/(?:references|templates)\/[a-z0-9-]+\.md/g)) {
-    alvos.add(m[0]);
-    if (!fs.existsSync(path.join(root, m[0]))) erro(`${origem} aponta para ${m[0]}, que não existe`);
+    destinos.add(m[0]);
+    if (!fs.existsSync(path.join(root, m[0]))) error(`${origen} apunta a ${m[0]}, que no existe`);
   }
 }
-ok(`${alvos.size} alvos internos distintos verificados`);
-for (const rel of arquivos) if (!alvos.has(rel)) aviso(`arquivo não citado em nenhum lugar: ${rel}`);
+ok(`${destinos.size} destinos internos distintos verificados`);
+for (const rel of archivos) if (!destinos.has(rel)) aviso(`archivo no citado en ningún lugar: ${rel}`);
 
-console.log('\n=== 5. Marcadores de honestidade ===');
-let nPreencher = 0;
-let nNaoVerificado = 0;
-for (const rel of arquivos) {
+console.log('\n=== 5. Marcadores de honestidad ===');
+let nCompletar = 0;
+let nNoVerificado = 0;
+for (const rel of archivos) {
   const txt = fs.readFileSync(path.join(root, rel), 'utf8');
-  nPreencher += (txt.match(/\[a preencher\]/g) || []).length;
-  nNaoVerificado += (txt.match(/não verificado/g) || []).length;
+  nCompletar += (txt.match(/\[a completar\]/g) || []).length;
+  nNoVerificado += (txt.match(/no verificad/g) || []).length;
 }
-console.log(`  info  ${nPreencher} marcadores [a preencher]; ${nNaoVerificado} marcações "não verificado"`);
+console.log(`  info  ${nCompletar} marcadores [a completar]; ${nNoVerificado} marcas "no verificado"`);
 
-console.log('\n=== RESUMO ===');
-console.log(`  erros: ${erros}   avisos: ${avisos}`);
-console.log(erros === 0 ? '  RESULTADO: estrutura VÁLIDA' : '  RESULTADO: CORRIGIR os erros acima');
-process.exit(erros === 0 ? 0 : 1);
+console.log('\n=== RESUMEN ===');
+console.log(`  errores: ${errores}   avisos: ${avisos}`);
+console.log(errores === 0 ? '  RESULTADO: estructura VÁLIDA' : '  RESULTADO: corregir los errores anteriores');
+process.exit(errores === 0 ? 0 : 1);

@@ -1,4 +1,4 @@
-# motor-comercial-e-gestao-es
+# motor-comercial-y-gestion-es
 
 Skill de agente para motor comercial B2B y entrega de proyectos: oferta y precio, metodologías de venta (SPIN, MEDDPICC, JOLT, Challenger), outbound, motor de 12 pasos con diagnóstico y entrega de proyectos (PMBOK 7, valor ganado, riesgo, informes).
 

@@ -1,5 +1,5 @@
 ---
-name: motor-comercial-e-gestao-es
+name: motor-comercial-y-gestion-es
 description: Motor comercial y gestión de la entrega para negocios B2B de ciclo complejo. Úsala para revisar o corregir una oferta, un precio o un correo; diagnosticar por qué se estancaron los ingresos (alcance, calidad del lead, conversión, capacidad, retención); conducir el descubrimiento y la calificación (SPIN, MEDDPICC, Challenger, JOLT); armar una propuesta, una garantía y un plan 30/60/90; y para planificar, controlar e informar proyectos (PMBOK 7, valor ganado, riesgos, ISO 21502/31000). No la uses para análisis de código fuente ni para dictámenes jurídicos formales.
 whenToUse: Cuando la solicitud implica vender mejor (oferta, precio, objeción, pipeline, descubrimiento, propuesta) o entregar mejor (alcance, plazo, costo, riesgo, estado del proyecto). No la actives para arquitectura de software ni para asesoría jurídica o fiscal.
 ---
@@ -88,7 +88,7 @@ Recorre la **escalera de evidencia** (`references/01-evidence-and-profile.md`) e
 ## Mapa de la skill
 
 ```
-commercial-engine-and-delivery/
+motor-comercial-y-gestion-es/
 ├── SKILL.md                              ← este archivo (enrutador)
 ├── references/
 │   ├── 01-evidence-and-profile.md        escalera de evidencia, qué prometer, cómo completar el perfil
